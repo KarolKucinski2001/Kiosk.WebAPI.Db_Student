@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Kiosk.WebAPI.Persistance;
 using Kiosk.WebAPI.Db.Services;
 using Kiosk.WebAPI.Db.Middleware;
+using FluentValidation;
+using Kiosk.WebAPI.Db.Dto.Validators;
+using Kiosk.WebAPI.Dto;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +35,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 // rejestracja exception middleware-a w kontenerze IoC 
 builder.Services.AddScoped<ExceptionMiddleware>();
 
-
+// rejestracja walidatora 
+builder.Services.AddScoped<IValidator<CreateProductDto>, RegisterCreateProductDtoValidator>();
 
 // rejestracja seeder-a w kontenerze IoC 
 builder.Services.AddScoped<DataSeeder>();

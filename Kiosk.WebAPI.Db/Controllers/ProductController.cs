@@ -13,6 +13,11 @@ namespace Kiosk.WebAPI.Controllers
 
         private readonly IKioskUnitOfWork _unitOfWork;  
         private readonly IProductService _productService;   
+        //public ProductController(IProductService productService)
+        //{
+        //    _productService = productService;
+        //}
+
         public ProductController(IProductService productService)
         {
             _productService = productService;
