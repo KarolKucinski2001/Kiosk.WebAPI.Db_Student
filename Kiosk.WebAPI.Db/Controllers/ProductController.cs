@@ -13,29 +13,15 @@ namespace Kiosk.WebAPI.Controllers
 
         private readonly IKioskUnitOfWork _unitOfWork;  
         private readonly IProductService _productService;   
-        public ProductController(IKioskUnitOfWork unitOfWork)
+        public ProductController(IProductService productService)
         {
-            _unitOfWork=unitOfWork;
+            _productService = productService;
         }
         [HttpGet]
         public ActionResult<IEnumerable<ProductDto>> Get()
         {
-            var products = _unitOfWork.ProductRepository.GetAll()
-                .ToList();
-
-            List<ProductDto> result = new List<ProductDto>();
-            foreach(var s in products)
-            {
-                result.Add(new ProductDto()
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    Description = s.Description,
-                    UnitPrice = s.UnitPrice,
-                });
-            }
-    
-            return Ok(result);
+            var products = _productService.GetAll();
+            return Ok(products);
         }
 
         [HttpGet("{id}", Name ="GetProduct")]
@@ -44,27 +30,15 @@ namespace Kiosk.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult<ProductDto> Get(int id)
         {
-            if (id <= 0)
+            try
             {
-                return BadRequest();
+                var product = _productService.GetById(id);
+                return Ok(product);
             }
-
-            var product = _unitOfWork.ProductRepository.Find(s => s.Id == id)
-                .FirstOrDefault(s => s.Id == id);
-            if (product == null)
-            {
+            catch (ArgumentException)
+            { 
                 return NotFound();
             }
-
-            var result = new ProductDto()
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                UnitPrice = product.UnitPrice,
-            };
-
-            return Ok(result);
         }
 
 
@@ -74,29 +48,21 @@ namespace Kiosk.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Create([FromBody] CreateProductDto dto)
         {
-            if (dto == null)
+            if(dto == null)
             {
-                return BadRequest();
+                return BadRequest(); 
             }
-
-            //var id = ProductStore.Products
-            //    .Max(s => s.Id) + 1;
-
-            var product = new Product()
+            try
             {
-                //Id = id,
-                Name = dto.Name,
-                Description = dto.Description,
-                UnitPrice = dto.UnitPrice,
-                CreatedAt = DateTime.Now,
-            };
-            //ProductStore.Products.Add(product);
-            _unitOfWork.ProductRepository.Insert(product);  
-            
-
-            var actionName = nameof(Get);
-            var routeValues = new { id=product.Id };
-            return CreatedAtAction(actionName, routeValues, null);
+                var id = ProductStore.Products.Max(s => s.Id) + 1;
+                _productService.Create(dto);
+                var actionName = nameof(Create);
+                return CreatedAtAction(actionName, new { id }, null);
+            }
+            catch(Exception)
+            {
+                return BadRequest();    
+            }
         }
 
 
@@ -105,18 +71,16 @@ namespace Kiosk.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public ActionResult Delete(int id) 
         {
-            var product = _unitOfWork.ProductRepository.Find(s => s.Id == id)   
-                .FirstOrDefault(s => s.Id == id);
-
-            if (product == null)
+            try
             {
-                return NotFound();
+                _productService.Delete(id);
+                return Ok();
             }
-
-            //ProductStore.Products.Remove(product);
-            _unitOfWork.ProductRepository.Delete(product);
+            catch(Exception)
+            {
+                return NotFound();    
+            }
             
-            return NoContent();
         }
 
         [HttpPut("{id}")]
@@ -125,22 +89,16 @@ namespace Kiosk.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Update(int id, [FromBody] UpdateProductDto dto)
         {
-            if ((dto == null) || (dto.Id == id))
+            if(dto==null||dto.Id!=id) { return BadRequest(); }
+            try
             {
-                return BadRequest();
+               _productService.Update(dto);
+                return Ok();
             }
-
-            var product = _unitOfWork.ProductRepository.Find(s => s.Id == dto.Id).FirstOrDefault(s => s.Id == dto.Id);
-            if (product == null) 
+            catch (Exception)
             { 
-                return NotFound();
+                return NotFound(); 
             }
-
-            product.Name = dto.Name;
-            product.Description = dto.Description;
-            product.UnitPrice = dto.UnitPrice;
-
-            return NoContent();
         }
     }
 }

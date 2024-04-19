@@ -5,6 +5,7 @@ using Kiosk.WebAPI.Persistance;
 namespace Kiosk.WebAPI.Db.Services
 {
 
+
     public class ProductService:IProductService
     {
         private readonly IKioskUnitOfWork _unitOfWork;
@@ -13,7 +14,7 @@ namespace Kiosk.WebAPI.Db.Services
             _unitOfWork = iuow; 
         }
 
-        public int Create(CreateProductDto dto)
+        public void Create(CreateProductDto dto)
         {
 
             var product = new Product
@@ -21,19 +22,22 @@ namespace Kiosk.WebAPI.Db.Services
                 Name = dto.Name,
                 Description = dto.Description,
                 UnitPrice = dto.UnitPrice,
-                CreatedAt = DateTime.Now,
-
+                CreatedAt = DateTime.Now
             };
-            _unitOfWork.ProductRepository.Insert(product);
 
-            return product.Id;
+            _unitOfWork.ProductRepository.Insert(product);
+            _unitOfWork.Commit();
         }
 
         public void Delete(int id)
         {
-            var product = _unitOfWork.ProductRepository.Find(a => a.Id == id).FirstOrDefault(a=>a.Id==id);
-            if(product!=null) { throw new ArgumentException("Product not found"); }
+            var product = _unitOfWork.ProductRepository.Get(id);
+            if(product==null) 
+            {
+                throw new ArgumentException("Product not found");
+            }
             _unitOfWork.ProductRepository.Delete(product);
+            _unitOfWork.Commit();
         }
 
         public List<ProductDto> GetAll()
@@ -51,8 +55,11 @@ namespace Kiosk.WebAPI.Db.Services
 
         public ProductDto GetById(int id)
         {
-            var product=_unitOfWork.ProductRepository.Find(a =>a.Id==id).FirstOrDefault();
-            if(product!=null) { throw new ArgumentException("Product not found"); }
+            var product=_unitOfWork.ProductRepository.Get(id);
+            if(product==null) 
+            { 
+                throw new ArgumentException("Product not found");
+            }
             return new ProductDto
             {
                 Id = product.Id,
@@ -65,14 +72,16 @@ namespace Kiosk.WebAPI.Db.Services
 
         public void Update(UpdateProductDto dto)
         {
-            var product= _unitOfWork.ProductRepository.Find(a=>a.Id==dto.Id).FirstOrDefault();
-            if (product == null) { throw new ArgumentException("Product not found"); }
+            var product= _unitOfWork.ProductRepository.Get(dto.Id);
+            if (product == null)
+            { 
+                throw new ArgumentException("Product not found");
+            }
             
             product.UnitPrice = dto.UnitPrice;
             product.Name = dto.Name;
             product.Description = dto.Description;
-
-            
+            _unitOfWork.Commit();
         }
     }
 }
