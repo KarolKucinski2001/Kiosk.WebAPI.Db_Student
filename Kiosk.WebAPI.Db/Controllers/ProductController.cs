@@ -6,7 +6,7 @@ using Kiosk.WebAPI.Db.Services;
 
 namespace Kiosk.WebAPI.Controllers
 {
-    [ApiController]
+   // [ApiController]
     [Route("[controller]")]
     public class ProductController : Controller
     {
@@ -89,7 +89,7 @@ namespace Kiosk.WebAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Update(int id, [FromBody] UpdateProductDto dto)
         {
-            if(dto==null||dto.Id!=id) { return BadRequest(); }
+            if(dto==null||dto.Id!=id) { return BadRequest(); } //BadRequest - wina jest po stronie klienta
             try
             {
                _productService.Update(dto);

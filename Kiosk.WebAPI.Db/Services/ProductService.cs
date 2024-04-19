@@ -1,4 +1,5 @@
-﻿using Kiosk.WebAPI.Dto;
+﻿using Kiosk.WebAPI.Db.Exceptions;
+using Kiosk.WebAPI.Dto;
 using Kiosk.WebAPI.Models;
 using Kiosk.WebAPI.Persistance;
 
@@ -34,7 +35,7 @@ namespace Kiosk.WebAPI.Db.Services
             var product = _unitOfWork.ProductRepository.Get(id);
             if(product==null) 
             {
-                throw new ArgumentException("Product not found");
+                throw new BadRequestException("Product not found 123");
             }
             _unitOfWork.ProductRepository.Delete(product);
             _unitOfWork.Commit();
@@ -55,10 +56,15 @@ namespace Kiosk.WebAPI.Db.Services
 
         public ProductDto GetById(int id)
         {
+            if(id<0)
+            {
+                throw new BadRequestException("Id nie może być ujemne");
+            }
+
             var product=_unitOfWork.ProductRepository.Get(id);
             if(product==null) 
             { 
-                throw new ArgumentException("Product not found");
+                throw new NotFoundException("Product not found");
             }
             return new ProductDto
             {
@@ -75,7 +81,7 @@ namespace Kiosk.WebAPI.Db.Services
             var product= _unitOfWork.ProductRepository.Get(dto.Id);
             if (product == null)
             { 
-                throw new ArgumentException("Product not found");
+                throw new NotFoundException("Product not found");
             }
             
             product.UnitPrice = dto.UnitPrice;

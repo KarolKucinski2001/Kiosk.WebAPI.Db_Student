@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Kiosk.WebAPI.Persistance;
 using Kiosk.WebAPI.Db.Services;
+using Kiosk.WebAPI.Db.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +28,12 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 builder.Services.AddScoped<IProductService, ProductService>();
 
+
+// rejestracja exception middleware-a w kontenerze IoC 
+builder.Services.AddScoped<ExceptionMiddleware>();
+
+
+
 // rejestracja seeder-a w kontenerze IoC 
 builder.Services.AddScoped<DataSeeder>();
 
@@ -45,6 +52,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+
+// wstawienie exception middleware do potoku obs³ugi ¿¹dania 
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseHttpsRedirection();
 
