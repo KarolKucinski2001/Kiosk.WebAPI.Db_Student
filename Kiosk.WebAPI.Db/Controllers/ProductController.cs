@@ -3,25 +3,25 @@ using Kiosk.WebAPI.Dto;
 using Kiosk.WebAPI.Models;
 using Kiosk.WebAPI.Persistance;
 using Kiosk.WebAPI.Db.Services;
+using FluentValidation;
 
 namespace Kiosk.WebAPI.Controllers
 {
-   // [ApiController]
+    [ApiController]
     [Route("[controller]")]
     public class ProductController : Controller
     {
 
-        private readonly IKioskUnitOfWork _unitOfWork;  
-        private readonly IProductService _productService;   
-        //public ProductController(IProductService productService)
-        //{
-        //    _productService = productService;
-        //}
-
-        public ProductController(IProductService productService)
+     //   private readonly IKioskUnitOfWork _unitOfWork;  
+        private readonly IProductService _productService;
+        private readonly IValidator<CreateProductDto> _validator;
+        public ProductController(IProductService productService/*, IValidator<CreateProductDto> validator*/)
         {
-            _productService = productService;
+            this._productService = productService;
+            //_validator = validator;
         }
+
+
         [HttpGet]
         public ActionResult<IEnumerable<ProductDto>> Get()
         {
@@ -47,27 +47,23 @@ namespace Kiosk.WebAPI.Controllers
         }
 
 
-        // return CreatedAtAction() - dynamicznie twrozony url
+
+        //----------------
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult Create([FromBody] CreateProductDto dto)
         {
-            if(dto == null)
-            {
-                return BadRequest(); 
-            }
-            try
-            {
-                var id = ProductStore.Products.Max(s => s.Id) + 1;
-                _productService.Create(dto);
-                var actionName = nameof(Create);
-                return CreatedAtAction(actionName, new { id }, null);
-            }
-            catch(Exception)
-            {
-                return BadRequest();    
-            }
+            //var validationResult = _validator.Validate(dto);
+            //if (!validationResult.IsValid)
+            //{
+            //    return BadRequest(validationResult);
+            //}
+            var id = ProductStore.Products.Max(s => s.Id) + 1;
+            _productService.Create(dto);
+            var actionName = nameof(Get);
+            var routeValues = new { id };
+            return CreatedAtAction(actionName, routeValues, null);
         }
 
 

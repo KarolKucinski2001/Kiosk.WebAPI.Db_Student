@@ -5,6 +5,7 @@ using Kiosk.WebAPI.Db.Middleware;
 using FluentValidation;
 using Kiosk.WebAPI.Db.Dto.Validators;
 using Kiosk.WebAPI.Dto;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,7 +41,12 @@ builder.Services.AddScoped<IValidator<CreateProductDto>, RegisterCreateProductDt
 
 // rejestracja seeder-a w kontenerze IoC 
 builder.Services.AddScoped<DataSeeder>();
+// rejestracja walidatora 
+builder.Services.AddScoped<IValidator<CreateProductDto>, RegisterCreateProductDtoValidator>();
 
+// Rejestracja automatycznej walidacji  
+// FluentValidation waliduje i przekazuje wynik przez ModelState 
+builder.Services.AddFluentValidationAutoValidation();
 //... 
 var app = builder.Build();
 // uruchomienie seedera 

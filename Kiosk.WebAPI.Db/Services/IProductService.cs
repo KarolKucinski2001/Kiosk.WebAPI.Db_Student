@@ -9,5 +9,6 @@ namespace Kiosk.WebAPI.Db.Services
         void Create(CreateProductDto dto);
         void Update(UpdateProductDto dto);
         void Delete(int id);
+        bool IsInUse(string name);
     }
 }

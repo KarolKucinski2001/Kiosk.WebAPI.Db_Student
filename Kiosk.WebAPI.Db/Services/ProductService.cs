@@ -76,6 +76,15 @@ namespace Kiosk.WebAPI.Db.Services
             };
         }
 
+        public bool  IsInUse(string name)
+        {
+
+            var category = _unitOfWork.ProductRepository.Find(x => x.Name.ToLower() == name.ToLower()).SingleOrDefault();
+
+            if (category == null) return true;
+            return false;
+        }
+
         public void Update(UpdateProductDto dto)
         {
             var product= _unitOfWork.ProductRepository.Get(dto.Id);

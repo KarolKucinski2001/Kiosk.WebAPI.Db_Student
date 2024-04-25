@@ -6,5 +6,6 @@ namespace Kiosk.WebAPI.Persistance
     public interface IProductRepository : IRepository<Product>
     {
         int GetMaxId();
+        //bool UniqueName(string name);
     }
 }
